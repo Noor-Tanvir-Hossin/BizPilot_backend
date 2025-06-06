@@ -1,0 +1,95 @@
+import { Schema, model } from "mongoose";
+import config from "../../config";
+import bcrypt from 'bcrypt';
+import validator from 'validator'
+import { Tuser } from "./user.interface";
+import { boolean } from "zod";
+
+
+const userSchema = new Schema<Tuser>({
+    name:{
+        type:String,
+        required:[true, "Please add your name"],
+        unique:true,
+        trim:true,
+        minlength:3,
+        maxlength:30,
+        index:true
+    },
+    email: {
+        type:String,
+        required:[true, "Please provide email"],
+        unique:true,
+        lowercase:true,
+        validate:[validator.isEmail, "Please provide a valid email"]
+    },
+    password:{
+        type:String,
+        required:[true,"Please provide password"],
+        minlength:8,
+        select:false
+    },
+    passwordChangeAt:{
+        type:Date
+    },
+    profilePicture:{
+        type:String,
+    },
+    bio:{
+        type:String,
+        maxlength: 150,
+        default: "",
+    },
+    followers:[
+        {
+            type:Schema.Types.ObjectId, ref: 'User'
+        },
+    ],
+    following:[
+        {
+            type:Schema.Types.ObjectId, ref: 'User'
+        },
+    ],
+    posts:[
+        {
+            type:Schema.Types.ObjectId, ref: 'Post'
+        },
+    ],
+    savePosts:[
+        {
+            type:Schema.Types.ObjectId, ref: 'Post'
+        },
+    ],
+    isVarified:{
+        type:Boolean,
+        default:null
+    },
+    otp:{
+        type:String,
+        default:null,
+    },
+    otpExpires:{
+        type:Date,
+        default:null,
+    },
+    resetPasswordOtp:{
+        type:String,
+        default:null
+    },
+    resetPasswordOtpExpires:{
+        type:String,
+        default:null
+    },
+},{
+    timestamps:true
+})
+
+userSchema.pre('save', async function(next){
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const user= this
+    user.password= await bcrypt.hash(user.password, Number(config.bcrypt_salt_rounds))
+    next()
+  
+  })
+
+  export const User= model<Tuser>('User', userSchema)

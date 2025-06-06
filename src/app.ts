@@ -1,28 +1,46 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { bookRoutes } from './app/modules/book/book.route';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import path from 'path'
+import cookieParser from 'cookie-parser';
+import mongoSanitize from 'express-mongo-sanitize';
 import notFound from './app/utils/notFound';
 import globalErrorHandler from './app/utils/globalErrorHandler';
-import { orderRoutes } from './app/modules/order/order.route';
+import router from './app/routes';
+import exp from 'constants';
+import config from './app/config';
 
 const app = express()
-
-
+app.use("/",express.static('uploads'))
+app.use(cookieParser())
+app.use(helmet())
 app.use(express.json())
-app.use(cors())
 
 //application routes
-// app.use('/api',router)
-app.use("/api/products", bookRoutes);
-app.use("/api/orders", orderRoutes);
+app.use('/api',router)
+app.use(
+  cors({
+    origin:["https://localhost:3000"],
+    credentials:true
+  })
+)
+app.use(express.static(path.join(__dirname,"public")))
 
 
 app.get('/', (req:Request, res:Response) => {
-    res.send('Hello World!')
+    res.send('Welcome to Chatrise!')
   })
 
-  app.use(globalErrorHandler)
-  app.use(notFound)
+if(config.NODE_ENV === "development"){
+  app.use(morgan("dev"))
+}
+
+app.use(express.json({limit:"10kb"}))
+app.use(mongoSanitize())
+
+app.use(globalErrorHandler)
+app.use(notFound)
   
 
 export default app;
