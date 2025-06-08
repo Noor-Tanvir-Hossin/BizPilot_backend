@@ -11,9 +11,9 @@ export interface Tuser {
     posts?:mongoose.Types.ObjectId[];
     savePosts?:mongoose.Types.ObjectId[];
     isVarified:boolean;
-    otp:string,
-    otpExpires:Date,
-    resetPasswordOtp:string,
+    otp:string | undefined,
+    otpExpires:Date | undefined,
+    resetPasswordOtp:string ,
     resetPasswordOtpExpires:string,
     role: string;
     passwordChangeAt: Date;

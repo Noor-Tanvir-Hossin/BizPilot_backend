@@ -86,9 +86,18 @@ const userSchema = new Schema<Tuser>({
 
 userSchema.pre('save', async function(next){
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const user= this
-    user.password= await bcrypt.hash(user.password, Number(config.bcrypt_salt_rounds))
-    next()
+    // const user= this
+    // user.password= await bcrypt.hash(user.password, Number(config.bcrypt_salt_rounds))
+    // next()
+
+    if (!this.isModified('password')) return next();
+    if (!this.password) {
+      console.error("Password is undefined before hashing");
+      return next(new Error("Password is required"));
+    }
+    
+    this.password = await bcrypt.hash(this.password, Number(config.bcrypt_salt_rounds));
+    next();
   
   })
 

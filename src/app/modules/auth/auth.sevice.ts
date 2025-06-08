@@ -7,6 +7,7 @@ import { loadTemplate } from "./auth.utils";
 import { sendEmail } from "../../utils/email";
 import jwt from 'jsonwebtoken';
 import config from "../../config";
+import { HydratedDocument } from 'mongoose';
 
 
 const register = async (payload: Partial<Tuser>) => {
@@ -31,6 +32,7 @@ const register = async (payload: Partial<Tuser>) => {
       otp,
       message:"Your one-time password (OTP) for account verification : "
     })
+    let accessToken = "";
 
     try {
       await sendEmail({
@@ -42,18 +44,49 @@ const register = async (payload: Partial<Tuser>) => {
         email: newUser?.email,
       };
     
-      const accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+       accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
         expiresIn: '10d',
       });
     
     } catch (error) {
-      await User.findByIdAndDelete(newUser.id)
+      await User.findByIdAndDelete(newUser.id);
+      throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'There is an error while creating the account. Please try again later !')
     }
 
 
     return {newUser, accessToken}
   };
 
+  const verifyAccount = async(otp:string, user:HydratedDocument<Tuser>)=>{
+    if(!otp){
+      throw new AppError(StatusCodes.BAD_REQUEST,"Otp is required for verfication.")
+    }
+
+    if(user.otp !== otp){
+      throw new AppError(StatusCodes.BAD_REQUEST, "Invalid Otp")
+    }
+    if(!user.otpExpires || Date.now() > user.otpExpires.getTime()){
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Otp has expired. Please request a new otp')
+    }
+
+    const jwtPayload = {
+      email: user?.email,
+    };
+  
+     const accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+      expiresIn: '10d',
+    });
+ 
+    user.isVarified=true;
+    user.otp=undefined;
+    user.otpExpires=undefined;
+    
+    await user.save({validateBeforeSave:false})
+    return {user, accessToken}
+    
+  }
+
 export const AuthService = {
-    register
+    register,
+    verifyAccount
 }
