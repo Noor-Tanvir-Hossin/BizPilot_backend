@@ -7,7 +7,7 @@ import { HydratedDocument } from "mongoose";
 
 
 const register = catchAsync(async(req, res)=>{
-    const result = await AuthService.register(req.body);
+    const result = await AuthService.registerIntoDB(req.body);
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
@@ -19,11 +19,11 @@ const register = catchAsync(async(req, res)=>{
 })
 
 const verifyAccount = catchAsync(async(req, res)=>{
-    console.log(req.user)
-    console.log(req.body)
     const{otp}=req.body
     const user=req.user as HydratedDocument<Tuser>
-    const result = await AuthService.verifyAccount(otp, user);
+    const result = await AuthService.verifyAccountByOtp(otp, user);
+    
+
     
     sendResponse(res, {
         statusCode: StatusCodes.OK,
@@ -34,11 +34,25 @@ const verifyAccount = catchAsync(async(req, res)=>{
       });
 })
 
+const resendOtp = catchAsync(async(req, res)=>{
+   
+    const user=req.user as HydratedDocument<Tuser>
+    const result = await AuthService.verifyByResendOtp( user);
+    
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: 'A new Otp is send to your email.',
+        data: result,
+      });
+})
+
 
 
 
 
 export const AuthControllers = {
     register,
-    verifyAccount
+    verifyAccount,
+    resendOtp
 }

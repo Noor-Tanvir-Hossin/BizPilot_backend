@@ -10,7 +10,7 @@ import config from "../../config";
 import { HydratedDocument } from 'mongoose';
 
 
-const register = async (payload: Partial<Tuser>) => {
+const registerIntoDB = async (payload: Partial<Tuser>) => {
     const { email,name, password }= payload
 
     const existingUser = await User.findOne({email})
@@ -20,7 +20,7 @@ const register = async (payload: Partial<Tuser>) => {
     }
 
     const otp= generateOtp()
-    const otpExpires= Date.now() + 24*60*60*100;
+    const otpExpires= Date.now() + 24*60*60*1000;
     
     const newUser = await User.create({
       name,email,password,otp,otpExpires
@@ -57,7 +57,9 @@ const register = async (payload: Partial<Tuser>) => {
     return {newUser, accessToken}
   };
 
-  const verifyAccount = async(otp:string, user:HydratedDocument<Tuser>)=>{
+
+const verifyAccountByOtp = async(otp:string, user:HydratedDocument<Tuser>)=>{
+  
     if(!otp){
       throw new AppError(StatusCodes.BAD_REQUEST,"Otp is required for verfication.")
     }
@@ -86,7 +88,48 @@ const register = async (payload: Partial<Tuser>) => {
     
   }
 
+
+const verifyByResendOtp=async(user:HydratedDocument<Tuser>)=>{
+  const email=user.email
+  if(!email){
+    throw new AppError(StatusCodes.BAD_REQUEST,"Email is required")
+  }
+  const dbUser = await User.findOne({email})
+  if(!dbUser){
+    throw new AppError(StatusCodes.BAD_REQUEST,"User not found")
+  }
+  if(dbUser.isVarified){
+    throw new AppError(StatusCodes.BAD_REQUEST,"Account is verified")
+  }
+  const otp= generateOtp()
+  const otpExpires=new Date(Date.now() + 24 * 60 * 60 * 1000);
+  dbUser.otp= otp
+  dbUser.otpExpires=otpExpires
+
+  await dbUser.save({validateBeforeSave: false})
+  const htmlTemplate = loadTemplate("otpTemplate.hbs",{
+    title:"Otp Verification",
+    username: dbUser.name,
+    otp,
+    message:"Your one-time password (OTP) for account verification : "
+  })
+  
+  try {
+    await sendEmail({
+      email:dbUser.email,
+      subject: "Resend otp for email verificaiton",
+      html: htmlTemplate
+    })
+  } catch (error) {
+    dbUser.otp=undefined;
+    dbUser.otpExpires=undefined;
+    await dbUser.save({validateBeforeSave:false})
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,"There is an wrror sending email. Try again later!")
+  }
+}
+
 export const AuthService = {
-    register,
-    verifyAccount
+    registerIntoDB,
+    verifyAccountByOtp,
+    verifyByResendOtp
 }
