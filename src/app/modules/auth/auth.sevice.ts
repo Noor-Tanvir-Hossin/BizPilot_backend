@@ -128,8 +128,32 @@ const verifyByResendOtp=async(user:HydratedDocument<Tuser>)=>{
   }
 }
 
+const login = async(email:string,password:string)=>{
+  if(!email || !password){
+    throw new AppError(StatusCodes.BAD_REQUEST,"Please provide email and password")
+  }
+
+  const user = await User.findOne({email}).select("+password")
+  
+  if(!user || !(await user.correctPassword(password,user.password))){
+    throw new AppError(StatusCodes.UNAUTHORIZED,"Incorrect email or password")
+  }
+
+  const jwtPayload = {
+    email: user?.email,
+  };
+
+   const accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+    expiresIn: '10d',
+  });
+
+  return {user, accessToken}
+
+}
+
 export const AuthService = {
     registerIntoDB,
     verifyAccountByOtp,
-    verifyByResendOtp
+    verifyByResendOtp,
+    login
 }

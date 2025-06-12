@@ -2,11 +2,13 @@ import { Schema, model } from "mongoose";
 import config from "../../config";
 import bcrypt from 'bcrypt';
 import validator from 'validator'
-import { Tuser } from "./user.interface";
+import { IUserMethods, Tuser } from "./user.interface";
 import { boolean } from "zod";
+import { Model } from "mongoose";
 
+export type UserModel = Model<Tuser, {}, IUserMethods>;
 
-const userSchema = new Schema<Tuser>({
+const userSchema = new Schema<Tuser, UserModel, IUserMethods>({
     name:{
         type:String,
         required:[true, "Please add your name"],
@@ -101,4 +103,8 @@ userSchema.pre('save', async function(next){
   
   })
 
-  export const User= model<Tuser>('User', userSchema)
+  userSchema.methods.correctPassword= async function( userpassword:string, databasePassword:string){
+    return await bcrypt.compare(userpassword,databasePassword)
+  }
+
+  export const User= model<Tuser, UserModel>('User', userSchema)

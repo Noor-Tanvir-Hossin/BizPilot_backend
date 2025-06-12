@@ -47,12 +47,24 @@ const resendOtp = catchAsync(async(req, res)=>{
       });
 })
 
+const login = catchAsync(async(req, res)=>{
+    const{email,password}= req.body
+    const result = await AuthService.login(email,password);
 
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: 'Login succesfull',
+        token:result?.accessToken as string,
+        data: result?.user,
+      });
+})
 
 
 
 export const AuthControllers = {
     register,
     verifyAccount,
-    resendOtp
+    resendOtp,
+    login
 }

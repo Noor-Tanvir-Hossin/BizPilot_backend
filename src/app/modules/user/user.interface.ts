@@ -18,4 +18,8 @@ export interface Tuser {
     role: string;
     passwordChangeAt: Date;
   }
+
+  export interface IUserMethods {
+    correctPassword: (userPassword: string, databasePassword: string) => Promise<boolean>;
+  }
   
