@@ -211,11 +211,36 @@ const resetPassword = async(email:string, password:string, otp:string)=>{
   return{user, accessToken}
 }
 
+const changePassword = async(email:string, currentPass:string, newPass:string) => {
+
+  const user = await User.findOne({email}).select("+password")
+  if(!user){
+    throw new AppError(StatusCodes.BAD_REQUEST,"User Not Found")
+  }
+  if(!(await user.correctPassword(currentPass,user.password))){
+    throw new AppError(StatusCodes.BAD_REQUEST,"Incorret current password!")
+  }
+  user.password=newPass
+  await user.save()
+
+  const jwtPayload = {
+    email: user?.email,
+  };
+
+   const accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+    expiresIn: '10d',
+  });
+
+  return{user, accessToken}
+
+}
+
 export const AuthService = {
     registerIntoDB,
     verifyAccountByOtp,
     verifyByResendOtp,
     login,
     forgetPassword,
-    resetPassword
+    resetPassword,
+    changePassword
 }
