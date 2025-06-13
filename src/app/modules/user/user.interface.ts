@@ -13,8 +13,8 @@ export interface Tuser {
     isVarified:boolean;
     otp:string | undefined,
     otpExpires:Date | undefined,
-    resetPasswordOtp:string ,
-    resetPasswordOtpExpires:string,
+    resetPasswordOtp:string | undefined ,
+    resetPasswordOtpExpires: Date | undefined,
     role: string;
     passwordChangeAt: Date;
   }

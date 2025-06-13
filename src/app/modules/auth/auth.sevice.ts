@@ -151,9 +151,71 @@ const login = async(email:string,password:string)=>{
 
 }
 
+const forgetPassword= async(email:string)=>{
+  const user = await User.findOne({email});
+  if(!user){
+    throw new AppError(StatusCodes.BAD_REQUEST,"User not found")
+  }
+  const otp = generateOtp();
+  const resetOtpExpires= new Date(Date.now() + 300000);
+
+  user.resetPasswordOtp = otp;
+  user.resetPasswordOtpExpires = resetOtpExpires;
+
+  await user.save({validateBeforeSave:false})
+
+  const htmlTemplate = loadTemplate("otpTemplate.hbs",{
+    title: "Reset Password OTP",
+    username: user.name,
+    otp,
+    message: "Your Passsword reset otp is",
+  })
+  try {
+    await sendEmail ({
+      email: user.email,
+      subject : "Password reset OTP (valid for 5min)",
+      html:htmlTemplate
+    })
+
+  } catch (error) {
+    user.resetPasswordOtp= undefined,
+    user.resetPasswordOtpExpires= undefined,
+    await user.save({validateBeforeSave:false})
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,"There was an error sending the email. Try again later!")
+
+  }
+}
+
+const resetPassword = async(email:string, password:string, otp:string)=>{
+  const user = await User.findOne({
+    email,
+    resetPasswordOtp:otp,
+    resetPasswordOtpExpires:{$gt:new Date()}
+  })
+
+  if(!user){
+    throw new AppError(StatusCodes.BAD_REQUEST,"No User Found")
+  }
+  user.password=password
+  user.resetPasswordOtp=undefined
+  user.resetPasswordOtpExpires=undefined
+
+  await user.save()
+  const jwtPayload = {
+    email: user?.email,
+  };
+
+   const accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+    expiresIn: '10d',
+  });
+  return{user, accessToken}
+}
+
 export const AuthService = {
     registerIntoDB,
     verifyAccountByOtp,
     verifyByResendOtp,
-    login
+    login,
+    forgetPassword,
+    resetPassword
 }

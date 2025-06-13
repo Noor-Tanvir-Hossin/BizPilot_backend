@@ -79,7 +79,7 @@ const userSchema = new Schema<Tuser, UserModel, IUserMethods>({
         default:null
     },
     resetPasswordOtpExpires:{
-        type:String,
+        type:Date,
         default:null
     },
 },{
