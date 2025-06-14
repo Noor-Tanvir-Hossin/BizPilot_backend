@@ -3,6 +3,7 @@ import AppError from "../../error/AppError"
 import { User } from "./user.model"
 import { getDataUri } from "../../utils/datauri"
 import { uploadToCloudinary } from "../../utils/cloudinary"
+import mongoose from "mongoose";
 
 const getUserProfileFromDB = async(id:string)=>{
     const user= await User.findById(id)
@@ -44,6 +45,50 @@ const editUserProfileIntoDB = async(id:string, bio:string, profilePicture?:Expre
 
 }
 
+const suggestedUserProfile= async(id:mongoose.Types.ObjectId)=>{
+    const users = await User.find({_id:{$ne : id}}).select("-password -otp -otpExpires -resetPasswordOtp -resetPasswordOtpExpires")
+    return users
+}
+
+const followUnfollow = async(userId:mongoose.Types.ObjectId, targetedUserId:string)=>{
+
+    if(userId.toString() === targetedUserId ){
+        throw new AppError(StatusCodes.BAD_REQUEST,"You cannot follow/unfollow yourself")
+    }
+    const targetUser= await User.findById(targetedUserId)
+    if(!targetUser){
+        throw new AppError(StatusCodes.NOT_FOUND,"User Not Found")
+    }
+    const isFollowing= targetUser.followers?.includes(userId)
+    if(isFollowing){
+        await Promise.all([
+            User.updateOne(
+                {_id: userId},
+                {$pull : {following: targetedUserId}}
+            ),
+            User.updateOne(
+                {_id: targetedUserId},
+                {$pull : {followers: userId}}
+            ),
+            
+        ])
+    }else{
+        await Promise.all([
+            User.updateOne(
+                {_id: userId},
+                {$addToSet : {following: targetedUserId}}
+            ),
+            User.updateOne(
+                {_id: targetedUserId},
+                {$addToSet : {followers: userId}}
+            ),
+            
+        ])
+    }
+    const updateLoggedInUser= await User.findById(userId).select('-password')
+    
+    return{isFollowing, updateLoggedInUser}
+}
 
 
 
@@ -51,5 +96,8 @@ const editUserProfileIntoDB = async(id:string, bio:string, profilePicture?:Expre
 
 export const UserService = {
     getUserProfileFromDB,
-    editUserProfileIntoDB
+    editUserProfileIntoDB,
+    suggestedUserProfile,
+    followUnfollow
+
 }

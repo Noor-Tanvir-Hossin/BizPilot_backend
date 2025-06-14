@@ -31,7 +31,40 @@ const editUserProfile = catchAsync(async(req ,res)=>{
     })
   })
 
+const suggestedUserProfile = catchAsync(async(req ,res)=>{
+
+    
+    const id= req.user?._id
+    console.log(id);
+    
+    const result = await UserService.suggestedUserProfile(id)
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Suugested user profile get successfully',
+      data : result,
+    })
+  })
+const followUnfollow = catchAsync(async(req ,res)=>{
+
+    
+    const userId= req.user?._id
+    const targetedUserId= req.params.id
+
+    console.log(userId);
+    
+    const result = await UserService.followUnfollow(userId, targetedUserId )
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: result.isFollowing ? 'Unfollowed successfully' : 'Followed Successfulyy' ,
+      data : result.updateLoggedInUser,
+    })
+  })
+
   export const UserControllers = {
     getUserProfile,
-    editUserProfile
+    editUserProfile,
+    suggestedUserProfile,
+    followUnfollow
   }
