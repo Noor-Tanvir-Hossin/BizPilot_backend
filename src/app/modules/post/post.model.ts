@@ -41,4 +41,4 @@ const postSchema = new Schema<IPost>(
 
 postSchema.index({user: 1, createdAt:-1})
 
-export const User = model<IPost>('Post', postSchema);
+export const Post = model<IPost>('Post', postSchema);
