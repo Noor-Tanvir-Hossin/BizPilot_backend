@@ -94,6 +94,7 @@ const followUnfollow = async(userId:mongoose.Types.ObjectId, targetedUserId:stri
 
 
 
+
 export const UserService = {
     getUserProfileFromDB,
     editUserProfileIntoDB,

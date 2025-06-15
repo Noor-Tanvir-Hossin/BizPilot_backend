@@ -62,9 +62,28 @@ const followUnfollow = catchAsync(async(req ,res)=>{
     })
   })
 
+const getMe = catchAsync(async(req ,res)=>{
+
+    
+    const user= req.user
+
+    console.log(user);
+    if(!user){
+      throw new AppError(StatusCodes.NOT_FOUND,"User Not Authenticated")
+    }
+
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Authenticated User',
+      data : user,
+    })
+  })
+
   export const UserControllers = {
     getUserProfile,
     editUserProfile,
     suggestedUserProfile,
-    followUnfollow
+    followUnfollow,
+    getMe
   }
