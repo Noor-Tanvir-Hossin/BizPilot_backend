@@ -44,8 +44,41 @@ const createPostIntoDB= async(caption:string, image:Express.Multer.File, userId:
     
 }
 
-const 
+const getAllPostFromDB=async()=>{
+    const posts= await Post.find().populate({
+        path:"user",
+        select:'name profilePicture bio',
+    })
+    .populate({
+        path: 'comment',
+        select:"text user",
+        populate:{
+            path:'user',
+            select:'name profilePicture'
+        }
+    }).sort({createdAt: -1})
+    let postLength= posts.length
+    return {posts, postLength}
+}
+
+const getSingleUserPostFromDB=async(id:string)=>{
+    const post= await Post.find({user:id})
+    .populate({
+        path: 'comment',
+        select:"text user",
+        populate:{
+            path:'user',
+            select:'name profilePicture'
+        }
+    }).sort({createdAt: -1})
+    
+    return post
+}
+
+
 
 export const postService={
-    createPostIntoDB
+    createPostIntoDB,
+    getAllPostFromDB,
+    getSingleUserPostFromDB
 }

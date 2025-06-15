@@ -21,6 +21,31 @@ const createPost = catchAsync(async(req ,res)=>{
     })
   })
 
+
+const getAllPost = catchAsync(async(req ,res)=>{
+    const result = await postService.getAllPostFromDB()
+
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'All post get successfully',
+      data : result,
+    })
+  })
+const getSingleUserPost = catchAsync(async(req ,res)=>{
+    const {id}=req.params
+    const result = await postService.getSingleUserPostFromDB(id)
+
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Post retrieved successfully',
+      data : result,
+    })
+  })
+
   export const postControllers = {
-    createPost
+    createPost,
+    getAllPost,
+    getSingleUserPost
   }
