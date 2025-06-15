@@ -7,7 +7,7 @@ export interface IPost extends Document{
     url: string;
     publicId: string;
   };
-  user: mongoose.Types.ObjectId[];
+  user: mongoose.Types.ObjectId;
   likes: mongoose.Types.ObjectId[];
   comment: mongoose.Types.ObjectId[];
   createdAt: Date;
