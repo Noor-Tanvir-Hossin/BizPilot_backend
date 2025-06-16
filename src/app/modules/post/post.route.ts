@@ -11,5 +11,6 @@ router.get('/user-post/:id',postControllers.getSingleUserPost);
 router.post('/save-unsave/:id',auth,postControllers.saveOrUnSavePost);
 router.delete('/delete-post/:id',auth,postControllers.deletePost);
 router.post('/like-dislike-post/:id',auth,postControllers.likeOrDislikePost);
+router.post('/comment/:id',auth,postControllers.addComment);
 
 export const PostRouter = router;

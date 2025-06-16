@@ -23,7 +23,7 @@ const postSchema = new Schema<IPost>(
         ref: 'User',
       },
     ],
-    comment: [
+    comments: [
       {
         type: Schema.Types.ObjectId,
         ref: 'Comment',

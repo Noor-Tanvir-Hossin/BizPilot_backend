@@ -144,6 +144,34 @@ const likeOrDislikePost=async(userId:mongoose.Types.ObjectId, postId:string)=>{
     return {isLiked}
 }
 
+const addComment=async(userId:mongoose.Types.ObjectId, postId:string, comment: string)=>{
+    const post = await Post.findById(postId)
+
+    if(!post){
+        throw new AppError(StatusCodes.NOT_FOUND,"post Not Found")
+    }
+    if(!comment){
+        throw new AppError(StatusCodes.BAD_REQUEST,"Comment text is required")
+    }
+
+   const createComment= await Comment.create({
+    text:comment,
+    user: userId,
+    createdAt:Date.now()
+   })
+   post.comments.push(createComment?._id as mongoose.Types.ObjectId)
+   await post.save({validateBeforeSave:false})
+   await createComment.populate({
+    path:'user',
+    select: "name profilePicture bio"
+   })
+
+   return createComment
+
+}
+
+
+
 
 
 export const postService={
@@ -152,5 +180,6 @@ export const postService={
     getSingleUserPostFromDB,
     saveOrUnsavePostIntoDB,
     deletePostFromDB,
-    likeOrDislikePost
+    likeOrDislikePost,
+    addComment
 }

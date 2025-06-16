@@ -78,7 +78,21 @@ const likeOrDislikePost = catchAsync(async(req ,res)=>{
       success: true,
       statusCode: StatusCodes.OK,
       message: result.isLiked?'Post disliked successfully': 'Post liked successfully' ,
-      data : null,
+      data : result,
+    })
+  })
+
+const addComment = catchAsync(async(req ,res)=>{
+    const userId=req.user?._id
+    const postId=req.params.id
+    const comment= req.body
+    const result = await postService.addComment(userId,postId,comment)
+
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message:'Commmetn added successfully' ,
+      data : result,
     })
   })
 
@@ -88,5 +102,6 @@ const likeOrDislikePost = catchAsync(async(req ,res)=>{
     getSingleUserPost,
     saveOrUnSavePost,
     deletePost,
-    likeOrDislikePost
+    likeOrDislikePost,
+    addComment
   }
