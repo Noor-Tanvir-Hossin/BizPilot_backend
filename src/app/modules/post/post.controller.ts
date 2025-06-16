@@ -46,7 +46,7 @@ const getSingleUserPost = catchAsync(async(req ,res)=>{
 
 const saveOrUnSavePost = catchAsync(async(req ,res)=>{
     const userId=req.user?._id
-    const postId=req.params.postId
+    const postId=req.params.id
     const result = await postService.saveOrUnsavePostIntoDB(userId,postId)
 
     sendResponse(res , {
@@ -60,12 +60,24 @@ const saveOrUnSavePost = catchAsync(async(req ,res)=>{
 const deletePost = catchAsync(async(req ,res)=>{
     const userId=req.user?._id
     const postId=req.params.id
-    const result = await postService.saveOrUnsavePostIntoDB(userId,postId)
+    const result = await postService.deletePostFromDB(userId,postId)
 
     sendResponse(res , {
       success: true,
       statusCode: StatusCodes.OK,
       message:'Post deleted successfully',
+      data : null,
+    })
+  })
+const likeOrDislikePost = catchAsync(async(req ,res)=>{
+    const userId=req.user?._id
+    const postId=req.params.id
+    const result = await postService.likeOrDislikePost(userId,postId)
+
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: result.isLiked?'Post disliked successfully': 'Post liked successfully' ,
       data : null,
     })
   })
@@ -75,5 +87,6 @@ const deletePost = catchAsync(async(req ,res)=>{
     getAllPost,
     getSingleUserPost,
     saveOrUnSavePost,
-    deletePost
+    deletePost,
+    likeOrDislikePost
   }

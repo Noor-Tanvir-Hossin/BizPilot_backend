@@ -8,7 +8,8 @@ const router = express.Router()
 router.post('/',auth ,upload.single('image'),postControllers.createPost);
 router.get('/',postControllers.getAllPost);
 router.get('/user-post/:id',postControllers.getSingleUserPost);
-router.post('/save-unsave/:postId',auth,postControllers.saveOrUnSavePost);
-router.delete('/delete-post/:postId',auth,postControllers.deletePost);
+router.post('/save-unsave/:id',auth,postControllers.saveOrUnSavePost);
+router.delete('/delete-post/:id',auth,postControllers.deletePost);
+router.post('/like-dislike-post/:id',auth,postControllers.likeOrDislikePost);
 
 export const PostRouter = router;

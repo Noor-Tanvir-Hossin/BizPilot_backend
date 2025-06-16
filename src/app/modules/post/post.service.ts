@@ -120,6 +120,30 @@ const deletePostFromDB=async(userId:mongoose.Types.ObjectId, postId:string)=>{
 
 }
 
+const likeOrDislikePost=async(userId:mongoose.Types.ObjectId, postId:string)=>{
+    const post = await Post.findById(postId)
+    if(!post){
+        throw new AppError(StatusCodes.NOT_FOUND,"post Not Found")
+    }
+    const isLiked = post.likes.includes(userId)
+    if(isLiked){
+        await Post.findByIdAndUpdate(
+            postId,
+            {$pull: {likes: userId}},
+            {new:true}
+
+        )
+    }else{
+        await Post.findByIdAndUpdate(
+            postId,
+            {$addToSet: {likes: userId}},
+            {new:true}
+
+        )
+    }
+    return {isLiked}
+}
+
 
 
 export const postService={
@@ -127,5 +151,6 @@ export const postService={
     getAllPostFromDB,
     getSingleUserPostFromDB,
     saveOrUnsavePostIntoDB,
-    deletePostFromDB
+    deletePostFromDB,
+    likeOrDislikePost
 }
