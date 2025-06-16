@@ -3,9 +3,10 @@ import AppError from "../../error/AppError";
 import { StatusCodes } from "http-status-codes";
 import sharp from 'sharp'
 import { Express } from 'express';
-import { uploadToCloudinary } from "../../utils/cloudinary";
+import { cloudinary, uploadToCloudinary } from "../../utils/cloudinary";
 import { Post } from "./post.model";
 import { User } from "../user/user.model";
+import { Comment } from "../comment/comment.model";
 
 
 const createPostIntoDB= async(caption:string, image:Express.Multer.File, userId:mongoose.Types.ObjectId)=>{
@@ -75,10 +76,56 @@ const getSingleUserPostFromDB=async(id:string)=>{
     return post
 }
 
+const saveOrUnsavePostIntoDB=async(userId:mongoose.Types.ObjectId, postId:string)=>{
+    const user= await User.findById(userId)
+
+    if(!user){
+        throw new AppError(StatusCodes.NOT_FOUND,"User Not Found")
+    }
+    const postObjectId = new mongoose.Types.ObjectId(postId);
+
+    const isPostSaved = user?.savePosts?.some(savedPostId => savedPostId.equals(postObjectId));
+
+    if(isPostSaved){
+        (user.savePosts as mongoose.Types.Array<mongoose.Types.ObjectId>).pull(postObjectId);
+        await user.save({validateBeforeSave:false});
+
+    }else{
+        user?.savePosts?.push(postObjectId);
+        await user.save({validateBeforeSave:false});
+    }
+
+    return {isPostSaved, user}
+}
+
+const deletePostFromDB=async(userId:mongoose.Types.ObjectId, postId:string)=>{
+    const post=await Post.findById(postId).populate("user")
+
+    if(!post){
+        throw new AppError(StatusCodes.NOT_FOUND,"post Not Found")
+    }
+    
+    if(post.user._id.toString() !== userId.toString()){
+        throw new AppError(StatusCodes.UNAUTHORIZED,"You are not authorized to delete that post")
+    }
+    await User.updateOne({_id:userId}, {$pull:{posts:postId}})
+    await User.updateMany({savePosts:postId }, {$pull:{savePosts:postId}})
+
+    await Comment.deleteMany({post: postId})
+
+    if(post?.image?.publicId){
+        await cloudinary.uploader.destroy(post.image.publicId)
+    }
+    await Post.findByIdAndDelete(postId)
+
+}
+
 
 
 export const postService={
     createPostIntoDB,
     getAllPostFromDB,
-    getSingleUserPostFromDB
+    getSingleUserPostFromDB,
+    saveOrUnsavePostIntoDB,
+    deletePostFromDB
 }

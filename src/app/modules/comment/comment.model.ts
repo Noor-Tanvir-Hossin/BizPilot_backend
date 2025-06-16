@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ICommment } from './comment.interface';
 
-const commetSchema = new Schema<ICommment>(
+const commentSchema = new Schema<ICommment>(
   {
     text:{
       type: String,
@@ -27,4 +27,4 @@ const commetSchema = new Schema<ICommment>(
 
 
 
-export const User = model<ICommment>('Comment', commetSchema);
+export const Comment = model<ICommment>('Comment', commentSchema);

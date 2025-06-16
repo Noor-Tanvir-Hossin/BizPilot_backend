@@ -44,8 +44,36 @@ const getSingleUserPost = catchAsync(async(req ,res)=>{
     })
   })
 
+const saveOrUnSavePost = catchAsync(async(req ,res)=>{
+    const userId=req.user?._id
+    const postId=req.params.postId
+    const result = await postService.saveOrUnsavePostIntoDB(userId,postId)
+
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: result.isPostSaved? 'post unsaved successfully' : 'post saved successfully',
+      data : result,
+    })
+  })
+
+const deletePost = catchAsync(async(req ,res)=>{
+    const userId=req.user?._id
+    const postId=req.params.id
+    const result = await postService.saveOrUnsavePostIntoDB(userId,postId)
+
+    sendResponse(res , {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message:'Post deleted successfully',
+      data : null,
+    })
+  })
+
   export const postControllers = {
     createPost,
     getAllPost,
-    getSingleUserPost
+    getSingleUserPost,
+    saveOrUnSavePost,
+    deletePost
   }
