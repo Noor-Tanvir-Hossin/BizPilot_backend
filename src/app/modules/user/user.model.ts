@@ -33,9 +33,11 @@ const userSchema = new Schema<Tuser, UserModel, IUserMethods>({
     },
     passwordChangeAt:{
         type:Date
+        
     },
     profilePicture:{
         type:String,
+        default: ''
     },
     bio:{
         type:String,

@@ -14,11 +14,6 @@ const commentSchema = new Schema<ICommment>(
       required: [true, 'User ID is required'],
     },
     
-    
-    createdAt:{
-        type:Date,
-        default:Date.now()
-    }
   },
   {
     timestamps: true,

@@ -5,7 +5,7 @@ import { User } from "../user/user.model";
 import { generateOtp } from "../../utils/generateOtp";
 import { loadTemplate } from "./auth.utils";
 import { sendEmail } from "../../utils/email";
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from "../../config";
 import { HydratedDocument } from 'mongoose';
 
@@ -47,14 +47,20 @@ const registerIntoDB = async (payload: Partial<Tuser>) => {
        accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
         expiresIn: '10d',
       });
+      const refreshToken = jwt.sign(
+        jwtPayload,
+        config.jwt_refresh_token as string,
+        { expiresIn: '365d' },
+      );
     
     } catch (error) {
+      console.error("Email sending failed", error);
       await User.findByIdAndDelete(newUser.id);
       throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'There is an error while creating the account. Please try again later !')
     }
 
 
-    return {newUser, accessToken}
+    return {newUser, accessToken, refreshToken}
   };
 
 
@@ -147,7 +153,13 @@ const login = async(email:string,password:string)=>{
     expiresIn: '10d',
   });
 
-  return {user, accessToken}
+  const refreshToken = jwt.sign(
+    jwtPayload,
+    config.jwt_refresh_token as string,
+    { expiresIn: '365d' },
+  );
+
+  return {user, accessToken,refreshToken}
 
 }
 
@@ -178,6 +190,7 @@ const forgetPassword= async(email:string)=>{
     })
 
   } catch (error) {
+    console.log("Email sending error:", error);
     user.resetPasswordOtp= undefined,
     user.resetPasswordOtpExpires= undefined,
     await user.save({validateBeforeSave:false})
@@ -221,6 +234,7 @@ const changePassword = async(email:string, currentPass:string, newPass:string) =
     throw new AppError(StatusCodes.BAD_REQUEST,"Incorret current password!")
   }
   user.password=newPass
+  user.passwordChangeAt = new Date();
   await user.save()
 
   const jwtPayload = {
@@ -234,6 +248,41 @@ const changePassword = async(email:string, currentPass:string, newPass:string) =
   return{user, accessToken}
 
 }
+const refreshToken = async (token: string) => {
+  // checking if the given token is valid
+  if (!token) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized!');
+  }
+
+  // checking if the given token is valid
+  const decoded = jwt.verify(
+    token,
+    config.jwt_refresh_token as string,
+  ) as JwtPayload;
+
+  const { email } = decoded;
+
+  // checking if the user is exist
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found !');
+  }
+
+  //create token and sent to the  client
+  const jwtPayload = {
+    email: user?.email,
+    role: user?.role,
+  };
+
+  const accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+    expiresIn: '10d',
+  });
+
+  return {
+    accessToken,
+  };
+};
 
 export const AuthService = {
     registerIntoDB,
@@ -242,5 +291,6 @@ export const AuthService = {
     login,
     forgetPassword,
     resetPassword,
-    changePassword
+    changePassword,
+    refreshToken
 }

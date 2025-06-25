@@ -5,9 +5,10 @@ import { auth } from '../../middleware/auth';
 
 const router = express.Router()
 
-router.get('/:id' ,UserControllers.getUserProfile);
-router.post('/edit-profile',auth,upload.single("profilePicture") ,UserControllers.editUserProfile);
 router.get('/suggested-user',auth ,UserControllers.suggestedUserProfile);
+router.get('/profile/:id' ,UserControllers.getUserProfile);
+router.post('/edit-profile',auth,upload.single("profilePicture") ,UserControllers.editUserProfile);
+
 router.post('/follow-unfollow/:id',auth ,UserControllers.followUnfollow);
 router.get('/me',auth ,UserControllers.getMe);
 

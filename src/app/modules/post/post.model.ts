@@ -29,10 +29,7 @@ const postSchema = new Schema<IPost>(
         ref: 'Comment',
       },
     ],
-    createdAt:{
-        type:Date,
-        default:Date.now()
-    }
+
   },
   {
     timestamps: true,

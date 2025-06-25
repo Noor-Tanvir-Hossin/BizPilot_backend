@@ -12,32 +12,37 @@ import exp from 'constants';
 import config from './app/config';
 
 const app = express()
-app.use("/",express.static('uploads'))
+app.use(cors({
+  origin:["http://localhost:3000"],
+  credentials:true,
+})
+)
+app.options('*', cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
+
+
 app.use(cookieParser())
 app.use(helmet())
 app.use(express.json())
+app.use(express.json())
+app.use(mongoSanitize())
+if(config.NODE_ENV === "development"){
+  app.use(morgan("dev"))
+}
+
+
+app.use("/",express.static('uploads'))
+app.use(express.static(path.join(__dirname,"public")))
 
 //application routes
 app.use('/api',router)
-app.use(
-  cors({
-    origin:["https://localhost:3000"],
-    credentials:true
-  })
-)
-app.use(express.static(path.join(__dirname,"public")))
-
 
 app.get('/', (req:Request, res:Response) => {
     res.send('Welcome to Chatrise!')
   })
 
-if(config.NODE_ENV === "development"){
-  app.use(morgan("dev"))
-}
-
-app.use(express.json({limit:"10kb"}))
-app.use(mongoSanitize())
 
 app.use(globalErrorHandler)
 app.use(notFound)

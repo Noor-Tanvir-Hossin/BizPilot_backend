@@ -38,7 +38,7 @@ const createPostIntoDB= async(caption:string, image:Express.Multer.File, userId:
     }
     post = await post.populate({
         path:'user',
-        select:"username email bio profilePicture"
+        select:"name email bio profilePicture"
     })
 
     return post
@@ -51,7 +51,7 @@ const getAllPostFromDB=async()=>{
         select:'name profilePicture bio',
     })
     .populate({
-        path: 'comment',
+        path: 'comments',
         select:"text user",
         populate:{
             path:'user',

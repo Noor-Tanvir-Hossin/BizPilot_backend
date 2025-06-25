@@ -35,7 +35,7 @@ const suggestedUserProfile = catchAsync(async(req ,res)=>{
 
     
     const id= req.user?._id
-    console.log(id);
+   
     
     const result = await UserService.suggestedUserProfile(id)
     sendResponse(res , {
@@ -57,7 +57,7 @@ const followUnfollow = catchAsync(async(req ,res)=>{
     sendResponse(res , {
       success: true,
       statusCode: StatusCodes.OK,
-      message: result.isFollowing ? 'Unfollowed successfully' : 'Followed Successfulyy' ,
+      message: result.isFollowing ? 'Unfollowed successfully' : 'Followed Successfully' ,
       data : result.updateLoggedInUser,
     })
   })

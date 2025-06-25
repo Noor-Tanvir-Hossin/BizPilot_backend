@@ -85,13 +85,13 @@ const likeOrDislikePost = catchAsync(async(req ,res)=>{
 const addComment = catchAsync(async(req ,res)=>{
     const userId=req.user?._id
     const postId=req.params.id
-    const comment= req.body
+    const {comment}= req.body
     const result = await postService.addComment(userId,postId,comment)
 
     sendResponse(res , {
       success: true,
       statusCode: StatusCodes.OK,
-      message:'Commmetn added successfully' ,
+      message:'Commment added successfully' ,
       data : result,
     })
   })

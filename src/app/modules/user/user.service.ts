@@ -9,7 +9,7 @@ const getUserProfileFromDB = async(id:string)=>{
     const user= await User.findById(id)
     .select("-password -otp -otpExpires -resetPasswordOtp -resetPasswordOtpExpires")
     .populate({
-        path:'post',
+        path:'posts',
         options:{sort:{createdAt: -1}}
     }).populate({
         path: "savePosts",
@@ -22,7 +22,7 @@ const getUserProfileFromDB = async(id:string)=>{
 
     return user
 }
-const editUserProfileIntoDB = async(id:string, bio:string, profilePicture?:Express.Multer.File)=>{
+const editUserProfileIntoDB = async(id:string, bio?:string, profilePicture?:Express.Multer.File)=>{
     let cloudResponse
     if(profilePicture){
         const fileuri= getDataUri(profilePicture)
@@ -39,13 +39,19 @@ const editUserProfileIntoDB = async(id:string, bio:string, profilePicture?:Expre
     if(profilePicture){
         user.profilePicture= cloudResponse?.secure_url
     }
+    await user.save();
+    const updatedUser = await User.findById(id)
+    .select('-password -otp -otpExpires -resetPasswordOtp -resetPasswordOtpExpires');
 
-    return user
+    return updatedUser
 
 
 }
 
 const suggestedUserProfile= async(id:mongoose.Types.ObjectId)=>{
+    if (!id ||!mongoose.Types.ObjectId.isValid(id)) {
+        throw new AppError(StatusCodes.BAD_REQUEST, "Invalid ID");
+      }
     const users = await User.find({_id:{$ne : id}}).select("-password -otp -otpExpires -resetPasswordOtp -resetPasswordOtpExpires")
     return users
 }

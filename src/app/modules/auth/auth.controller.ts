@@ -4,10 +4,18 @@ import sendResponse from "../../utils/sendResponse";
 import { AuthService } from "./auth.sevice";
 import { Tuser } from "../user/user.interface";
 import { HydratedDocument } from "mongoose";
+import config from "../../config";
 
 
 const register = catchAsync(async(req, res)=>{
     const result = await AuthService.registerIntoDB(req.body);
+    const { refreshToken } = result;
+
+    res.cookie('refreshToken', refreshToken, {
+      secure: config.NODE_ENV === 'production',
+      httpOnly: true,
+    });
+
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
@@ -50,6 +58,13 @@ const resendOtp = catchAsync(async(req, res)=>{
 const login = catchAsync(async(req, res)=>{
     const{email,password}= req.body
     const result = await AuthService.login(email,password);
+
+    const { refreshToken } = result;
+
+    res.cookie('refreshToken', refreshToken, {
+      secure: config.NODE_ENV === 'production',
+      httpOnly: true,
+    });
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
@@ -98,6 +113,19 @@ const changePassword = catchAsync(async(req, res)=>{
       });
 })
 
+const refreshToken = catchAsync(async (req, res) => {
+    const { refreshToken } = req.cookies;
+    const result = await AuthService.refreshToken(refreshToken);
+    
+  
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Access token is retrieved succesfully!',
+      data: result,
+    });
+  });
+
 
 
 export const AuthControllers = {
@@ -107,5 +135,6 @@ export const AuthControllers = {
     login,
     forgetPassword,
     resetPassword,
-    changePassword
+    changePassword,
+    refreshToken
 }
