@@ -8,7 +8,6 @@ import mongoSanitize from 'express-mongo-sanitize';
 import notFound from './app/utils/notFound';
 import globalErrorHandler from './app/utils/globalErrorHandler';
 import router from './app/routes';
-import exp from 'constants';
 import config from './app/config';
 
 const app = express()
