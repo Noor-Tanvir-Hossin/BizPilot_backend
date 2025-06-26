@@ -6,7 +6,8 @@
     "start": "node ./dist/server.js",
     "start:dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "lint": "eslint src/**/*.ts",
-    "build": "tsc",
+    "build": "tsc  && npm run copy:templates",
+    "copy:templates": "xcopy src\\app\\emailTemplate dist\\app\\emailTemplate /E /I /Y",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier . --write",
     "test": "echo \"Error: no test specified\" && exit 1"
