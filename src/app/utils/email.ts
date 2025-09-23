@@ -17,7 +17,7 @@ export const sendEmail =async(options:EmailOptions) =>{
 });
 
 const mailOptions = {
-    form: "'Chatrise' share your imaginaiton",
+    form: "'BizPlot' share your imaginaiton",
     to: options.email,
     subject:options.subject,
     html:options.html

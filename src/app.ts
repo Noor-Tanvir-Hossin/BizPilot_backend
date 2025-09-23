@@ -9,12 +9,12 @@ import notFound from './app/utils/notFound';
 import globalErrorHandler from './app/utils/globalErrorHandler';
 import router from './app/routes';
 import config from './app/config';
+import rateLimit from 'express-rate-limit';
 
 const app = express()
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://chatrise-frontend.vercel.app',
 ];
 
 app.use(
@@ -29,6 +29,13 @@ app.use(
     credentials: true,
   })
 );
+
+// rate limits
+const authLimiter = rateLimit({ windowMs: 60_000, max: 20 });
+const simLimiter  = rateLimit({ windowMs: 60_000, max: 10 });
+
+app.use('/api/auth', authLimiter);
+app.use('/api/ideas/:id/simulations', simLimiter);
 
 
 app.use(cookieParser())
@@ -48,7 +55,7 @@ app.use(express.static(path.join(__dirname,"public")))
 app.use('/api',router)
 
 app.get('/', (req:Request, res:Response) => {
-    res.send('Welcome to Chatrise!')
+    res.send('Welcome to BizPlo!')
   })
 
 

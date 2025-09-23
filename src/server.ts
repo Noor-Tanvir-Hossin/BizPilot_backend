@@ -11,7 +11,7 @@ async function main() {
     try {
         await mongoose.connect(config.database_url as string);
         server = app.listen(config.port, () => {
-            console.log(`Chatrise app running on port ${config.port}`)
+            console.log(`BizPlot app running on port ${config.port}`)
         })
   
     } catch (error) {
