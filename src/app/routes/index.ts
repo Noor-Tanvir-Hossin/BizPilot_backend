@@ -3,6 +3,7 @@ import { Router } from "express"
 import authRouter from "../modules/auth/auth.route"
 import { UserRouter } from "../modules/user/user.route"
 import { IdeaRouter } from "../modules/idea/idea.route"
+import { GeminiRouter } from "../modules/gemini/gemini.route"
 
 
 
@@ -21,6 +22,10 @@ const moduleRoutes = [
     {
         path: '/idea',
         route:IdeaRouter
+    },
+    {
+        path: '/gemini',
+        route:GeminiRouter
     },
    
 

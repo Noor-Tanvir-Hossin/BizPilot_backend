@@ -3,7 +3,7 @@ import { Idea } from "./idea.model";
 import { TIdea } from "./idea.interface";
 
 const createIdeaToDB = async (userId: string, payload: Partial<TIdea>) => {
-
+  console.log('payload', payload);
   const result = await Idea.create({
     userId: new Types.ObjectId(userId),
     title: payload.title!,

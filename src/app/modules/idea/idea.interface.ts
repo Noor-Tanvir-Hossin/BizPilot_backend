@@ -7,13 +7,23 @@ import { Types } from 'mongoose';
 //   order: number;
 // };
 
+export type TCategoryKey =
+  | 'marketing'
+  | 'Technology'
+  | 'Fashion'
+  | 'Food & Beverage'
+  | 'Health & Wellness'
+  | 'others';
+
+
+
 export type TIdea = {
   userId: Types.ObjectId;
   title: string;
   description?: string;
   location?: string;
   budget?: number;
-//   checklist: TChecklistItem[];
+  categories: TCategoryKey[];
   createdAt?: Date;
   updatedAt?: Date;
 };

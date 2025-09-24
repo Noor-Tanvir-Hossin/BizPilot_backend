@@ -7,7 +7,6 @@ import { IdeaService } from "./idea.service"
 const createIdea = catchAsync(async(req ,res)=>{
 
     const userId= req.user?._id;
-	const payload = req.body
     const result = await IdeaService.createIdeaToDB(userId, req.body)
     sendResponse(res , {
       success: true,
