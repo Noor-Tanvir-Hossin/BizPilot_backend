@@ -39,31 +39,7 @@ const userSchema = new Schema<Tuser, UserModel, IUserMethods>({
         type:String,
         default: ''
     },
-    bio:{
-        type:String,
-        maxlength: 150,
-        default: "",
-    },
-    followers:[
-        {
-            type:Schema.Types.ObjectId, ref: 'User'
-        },
-    ],
-    following:[
-        {
-            type:Schema.Types.ObjectId, ref: 'User'
-        },
-    ],
-    posts:[
-        {
-            type:Schema.Types.ObjectId, ref: 'Post'
-        },
-    ],
-    savePosts:[
-        {
-            type:Schema.Types.ObjectId, ref: 'Post'
-        },
-    ],
+    
     isVarified:{
         type:Boolean,
         default:null

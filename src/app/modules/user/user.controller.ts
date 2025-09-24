@@ -16,51 +16,23 @@ const getUserProfile = catchAsync(async(req ,res)=>{
     })
   })
 
-const editUserProfile = catchAsync(async(req ,res)=>{
+// const editUserProfile = catchAsync(async(req ,res)=>{
 
     
-    const id= req.user?.id
-    const{bio}=req.body
-    const profilePicture=req.file
-    const result = await UserService.editUserProfileIntoDB(id, bio, profilePicture)
-    sendResponse(res , {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'User profile updated successfully',
-      data : result,
-    })
-  })
+//     const id= req.user?.id
+//     const{bio}=req.body
+//     const profilePicture=req.file
+//     const result = await UserService.editUserProfileIntoDB(id, bio, profilePicture)
+//     sendResponse(res , {
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       message: 'User profile updated successfully',
+//       data : result,
+//     })
+//   })
 
-const suggestedUserProfile = catchAsync(async(req ,res)=>{
 
-    
-    const id= req.user?._id
-   
-    
-    const result = await UserService.suggestedUserProfile(id)
-    sendResponse(res , {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'Suugested user profile get successfully',
-      data : result,
-    })
-  })
-const followUnfollow = catchAsync(async(req ,res)=>{
 
-    
-    const userId= req.user?._id
-    const targetedUserId= req.params.id
-
-    console.log(userId);
-    
-    const result = await UserService.followUnfollow(userId, targetedUserId )
-    sendResponse(res , {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: result.isFollowing ? 'Unfollowed successfully' : 'Followed Successfully' ,
-      data : result.updateLoggedInUser,
-    })
-  })
 
 const getMe = catchAsync(async(req ,res)=>{
 
@@ -81,9 +53,6 @@ const getMe = catchAsync(async(req ,res)=>{
   })
 
   export const UserControllers = {
-    getUserProfile,
-    editUserProfile,
-    suggestedUserProfile,
-    followUnfollow,
+    getUserProfile, 
     getMe
   }

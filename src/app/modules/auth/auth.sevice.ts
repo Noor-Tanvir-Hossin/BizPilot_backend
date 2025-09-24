@@ -19,32 +19,27 @@ const registerIntoDB = async (payload: Partial<Tuser>) => {
       throw new AppError(StatusCodes.BAD_REQUEST, "Email already exist")
     }
 
-    const otp= generateOtp()
-    const otpExpires= Date.now() + 24*60*60*1000;
+    // const otp= generateOtp()
+    // const otpExpires= Date.now() + 24*60*60*1000;
     
     const newUser = await User.create({
-      name,email,password,otp,otpExpires
-    });
-
-    const htmlTemplate = loadTemplate("otpTemplate.hbs",{
-      title:"Otp Verification",
-      username: newUser.name,
-      otp,
-      message:"Your one-time password (OTP) for account verification : "
-    })
+      name,email,password
+    });    
     let accessToken = "";
 
-    try {
-      await sendEmail({
-        email:newUser.email,
-        subject: "OTP for Email Verfication",
-        html: htmlTemplate
-      })
-      const jwtPayload = {
+
+
+    // const htmlTemplate = loadTemplate("otpTemplate.hbs",{
+    //   title:"Otp Verification",
+    //   username: newUser.name,
+    //   otp,
+    //   message:"Your one-time password (OTP) for account verification : "
+    // })
+    const jwtPayload = {
         email: newUser?.email,
       };
     
-       accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+     accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
         expiresIn: '10d',
       });
       const refreshToken = jwt.sign(
@@ -52,12 +47,31 @@ const registerIntoDB = async (payload: Partial<Tuser>) => {
         config.jwt_refresh_token as string,
         { expiresIn: '365d' },
       );
+
+    // try {
+    //   await sendEmail({
+    //     email:newUser.email,
+    //     subject: "OTP for Email Verfication",
+    //     html: htmlTemplate
+    //   })
+    //   const jwtPayload = {
+    //     email: newUser?.email,
+    //   };
     
-    } catch (error) {
-      console.error("Email sending failed", error);
-      await User.findByIdAndDelete(newUser.id);
-      throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'There is an error while creating the account. Please try again later !')
-    }
+    //    accessToken = jwt.sign(jwtPayload, config.jwt_access_token as string, {
+    //     expiresIn: '10d',
+    //   });
+    //   const refreshToken = jwt.sign(
+    //     jwtPayload,
+    //     config.jwt_refresh_token as string,
+    //     { expiresIn: '365d' },
+    //   );
+    
+    // } catch (error) {
+    //   console.error("Email sending failed", error);
+    //   await User.findByIdAndDelete(newUser.id);
+    //   throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR,'There is an error while creating the account. Please try again later !')
+    // }
 
 
     return {newUser, accessToken, refreshToken}
